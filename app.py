@@ -271,6 +271,7 @@ st.markdown("""
         font-size: 0.76rem;
         font-weight: 600;
         display: inline-block;
+        white-space: nowrap;
     }
     .orbyte-status-approved {
         background: #DCFCE7;
@@ -280,6 +281,26 @@ st.markdown("""
         font-size: 0.76rem;
         font-weight: 600;
         display: inline-block;
+        white-space: nowrap;
+    }
+    .orbyte-activity-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.6fr) 160px minmax(0, 0.9fr) 70px;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 4px;
+        border-bottom: 1px solid #F1F5F9;
+        font-size: 0.84rem;
+    }
+    @media (max-width: 640px) {
+        .orbyte-activity-row {
+            grid-template-columns: minmax(0, 1fr) 150px minmax(0, 0.75fr);
+            gap: 8px;
+        }
+        .orbyte-activity-role,
+        .orbyte-activity-logged {
+            display: none;
+        }
     }
     .orbyte-user-footer {
         display: flex;
@@ -961,17 +982,17 @@ with col_outcome:
                 badge_class = "orbyte-status-approved" if "Approved" in status_txt or "Sent" in status_txt else "orbyte-status-pending"
 
                 st.markdown(f"""
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:11px 4px; border-bottom:1px solid #F1F5F9; font-size:0.84rem;">
-                    <div style="flex:1.6;">
+                <div class="orbyte-activity-row">
+                    <div>
                         <div style="font-weight:600; color:#0F172A;">{action_txt}</div>
                         <div style="font-size:0.76rem; color:#64748B;">{req_id_txt.lower()} • {vendor_txt}</div>
                     </div>
-                    <div style="flex:0.6; color:#64748B; font-size:0.8rem;">{role_txt}</div>
-                    <div style="flex:0.9;">
+                    <div class="orbyte-activity-role" style="color:#64748B; font-size:0.8rem;">{role_txt}</div>
+                    <div>
                         <span class="{badge_class}">⏱ {status_txt}</span>
                     </div>
-                    <div style="flex:0.9; color:#334155; font-size:0.8rem;">{ts_txt}</div>
-                    <div style="flex:0.7; text-align:right; color:#0284C7; font-weight:600; font-size:0.8rem;">
+                    <div style="color:#334155; font-size:0.8rem;">{ts_txt}</div>
+                    <div class="orbyte-activity-logged" style="text-align:right; color:#0284C7; font-weight:600; font-size:0.8rem;">
                         Logged ↗
                     </div>
                 </div>
