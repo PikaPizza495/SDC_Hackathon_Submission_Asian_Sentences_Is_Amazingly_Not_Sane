@@ -34,7 +34,7 @@ except ImportError:
 
 st.set_page_config(
     page_title="Orbyte | Smart SME Procurement Hub",
-    page_icon="💠",
+    page_icon=":material/hexagon:",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -78,6 +78,18 @@ st.markdown("""
         padding-top: 1.25rem !important;
         padding-left: 1.1rem !important;
         padding-right: 1.1rem !important;
+    }
+
+    /* Footer stays in normal flow: pushed down on tall screens, scrollable on short ones. */
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"]:has(.st-key-sidebar-account-footer) {
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: calc(100dvh - 110px);
+    }
+    section[data-testid="stSidebar"] .st-key-sidebar-account-footer,
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:has(.st-key-sidebar-account-footer) {
+        margin-top: auto !important;
+        flex: 0 0 auto;
     }
 
     /* Force all inputs, dropdowns, and number boxes to be crisp white (never black!) */
@@ -153,7 +165,7 @@ st.markdown("""
         background-color: #0369A1 !important;
     }
 
-    /* Orbyte Outlined Secondary Button (Like "View leave calendar ↗" in screenshot) */
+    /* Orbyte outlined secondary button treatment. */
     div.stButton > button[kind="secondary"] {
         background-color: #FFFFFF !important;
         color: #0369A1 !important;
@@ -200,6 +212,22 @@ st.markdown("""
         font-weight: 800;
         font-size: 1rem;
     }
+    .orbyte-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        vertical-align: -0.16em;
+        line-height: 0;
+    }
+    .orbyte-icon svg { display: block; }
+    .orbyte-nav-current {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #0284C7;
+        flex: 0 0 auto;
+    }
     .orbyte-nav-tree {
         font-size: 0.86rem;
         color: #475569;
@@ -216,9 +244,16 @@ st.markdown("""
         font-weight: 500;
     }
     .orbyte-nav-sub {
+        display: flex;
+        align-items: center;
         padding-left: 24px;
         font-size: 0.83rem;
         color: #64748B;
+    }
+    .orbyte-nav-item > span:first-child,
+    .orbyte-nav-active > span:first-child {
+        display: inline-flex;
+        align-items: center;
     }
     .orbyte-nav-active {
         background-color: #E0F2FE;
@@ -325,6 +360,32 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+def svg_icon(name: str, size: int = 18) -> str:
+    """Compact inline SVG icon set for custom HTML UI."""
+    paths = {
+        "layers": '<path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 16 9 5 9-5"/>',
+        "briefcase": '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2"/>',
+        "users": '<path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+        "package": '<path d="m12 3 9 5v8l-9 5-9-5V8l9-5Z"/><path d="m3.3 7.7 8.7 5 8.7-5M12 13v8M7.5 5.5l9 5"/>',
+        "bolt": '<path d="m13 2-3 8h7l-6 12 2-9H6l7-11Z"/>',
+        "clipboard": '<rect x="5" y="5" width="14" height="16" rx="2"/><path d="M9 5.5V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M8 11h8M8 15h8"/>',
+        "receipt": '<path d="M4 3h16v18l-3-2-3 2-2-2-3 2-2-2-3 2V3Z"/><path d="M8 8h8M8 12h8M8 16h4"/>',
+        "chart": '<path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/>',
+        "settings": '<circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.7 1l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.7-1l-1.7.7-1.4-2.4L7.3 15a7.5 7.5 0 0 1 0-2l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.7-1l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.7 1l1.7-.7 1.4 2.4-1.4 1.1a7.5 7.5 0 0 1-.1 2Z"/>',
+        "chevron": '<path d="m9 18 6-6-6-6"/>',
+        "chevron-down": '<path d="m6 9 6 6 6-6"/>',
+        "search": '<circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/>',
+        "check-circle": '<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>',
+        "clock": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+        "external": '<path d="M14 3h7v7M10 14 21 3"/><path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6"/>',
+    }
+    path = paths.get(name, paths["layers"])
+    return (
+        f'<span class="orbyte-icon" aria-hidden="true"><svg width="{size}" height="{size}" '
+        f'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
+        f'stroke-linecap="round" stroke-linejoin="round" focusable="false">{path}</svg></span>'
+    )
+
 FALLBACK_SUPPLIERS = [
     {"supplier_code": "SUP-001", "name": "Selangor EcoPack Sdn Bhd", "category": "Packaging", "products": "Kraft Paper Bowls (500ml/750ml) & Eco Containers", "unit": "per piece", "price_min_rm": 0.38, "price_max_rm": 0.65, "moq": 300, "state": "Selangor", "lead_time_days": 2, "reliability_rating": 4.8, "eco_certified": True, "phone": "+60121419610", "email": "sales@selangor-ecopack.example.com", "tags": "bowls,containers,eco,kraft,paper"},
     {"supplier_code": "SUP-016", "name": "Nusantara Coffee Roasters Sdn Bhd", "category": "F&B Ingredients", "products": "Arabica & Liberica Coffee Beans", "unit": "per kg", "price_min_rm": 38.00, "price_max_rm": 55.00, "moq": 10, "state": "Selangor", "lead_time_days": 2, "reliability_rating": 4.9, "eco_certified": True, "phone": "+60192622631", "email": "sales@nusantara-coffee-roasters.example.com", "tags": "arabica,beans,coffee,liberica"},
@@ -409,36 +470,36 @@ def evaluate_suppliers(df: pd.DataFrame, req: dict) -> pd.DataFrame:
 
         if has_keyword_match:
             score += 20
-            why.append("🎯 Exact Item")
+            why.append("Exact Item")
         else:
             score -= 30
-            why.append("⚠️ Diff Item")
+            why.append("Different Item")
 
         if row["Meets_MOQ"]:
             score += 15
-            why.append("✅ MOQ OK")
+            why.append("MOQ OK")
         else:
             score -= 25
-            why.append(f"❌ MOQ ({row['moq']})")
+            why.append(f"MOQ ({row['moq']})")
 
         if row["Within_Budget"]:
             score += 15
-            why.append("✅ In Budget")
+            why.append("In Budget")
         else:
             score -= 20
-            why.append("❌ Over Budget")
+            why.append("Over Budget")
 
         if row["Meets_Lead_Time"]:
             score += 10
-            why.append(f"🚚 {row['lead_time_days']}d Lead")
+            why.append(f"{row['lead_time_days']}d Lead")
         else:
             score -= 10
-            why.append(f"⏳ {row['lead_time_days']}d Lead")
+            why.append(f"{row['lead_time_days']}d Lead")
 
         score += int((row["reliability_rating"] - 4.0) * 10)
         if req["prefer_eco"] and bool(row["eco_certified"]):
             score += 5
-            why.append("🌱 Eco")
+            why.append("Eco")
 
         scores.append(max(0, min(100, score)))
         reasons.append(" • ".join(why))
@@ -462,7 +523,7 @@ def generate_rfq_text(top: dict, req: dict, lang: str, tone: int, provider: str,
         fallback_rfq = f"Salam / Hi {top['name']} Team,\n\nKami ingin meminta sebut harga:\n• Item: {req['item_name']}\n• Quantity: {req['quantity']}\n• Budget: RM {mins:.2f} – {maxs:.2f}\nBoleh sahkan stok dan penghantaran dalam {req['max_lead_days']} hari? / Can you confirm stock and delivery?\n\nThank you / Terima kasih."
 
     if not api_key:
-        return fallback_rfq, "⚠️ Using built-in Orbyte template (No API Key provided)."
+        return fallback_rfq, "Using built-in Orbyte template (No API Key provided)."
         
     tone_instruction = "formal and professional" if tone <= 2 else ("friendly and casual" if tone >= 4 else "standard business")
     
@@ -490,10 +551,10 @@ def generate_rfq_text(top: dict, req: dict, lang: str, tone: int, provider: str,
                     if response and response.text:
                         text = response.text.strip()
                         if len(text.split()) > 15:
-                            return text, f"✅ Drafted with Gemini ({model_name})."
+                            return text, f"Drafted with Gemini ({model_name})."
                 except Exception:
                     continue
-            return fallback_rfq, "❌ Gemini busy. Using template."
+            return fallback_rfq, "Gemini busy. Using template."
 
         elif provider == "Groq" and GROQ_AVAILABLE:
             client = Groq(api_key=api_key)
@@ -505,8 +566,8 @@ def generate_rfq_text(top: dict, req: dict, lang: str, tone: int, provider: str,
             )
             text = chat_completion.choices[0].message.content
             if text and len(text.split()) > 15:
-                return text.strip(), "✅ Drafted with Groq (Llama 3.3 70B)."
-            return fallback_rfq, "⚠️ Groq cut off message. Using template."
+                return text.strip(), "Drafted with Groq (Llama 3.3 70B)."
+            return fallback_rfq, "Groq cut off message. Using template."
 
         elif provider == "OpenRouter" and OPENROUTER_AVAILABLE:
             client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
@@ -518,13 +579,13 @@ def generate_rfq_text(top: dict, req: dict, lang: str, tone: int, provider: str,
             )
             text = response.choices[0].message.content
             if text and len(text.split()) > 15:
-                return text.strip(), "✅ Drafted with OpenRouter (DeepSeek)."
-            return fallback_rfq, "⚠️ OpenRouter cut off message. Using template."
+                return text.strip(), "Drafted with OpenRouter (DeepSeek)."
+            return fallback_rfq, "OpenRouter cut off message. Using template."
 
     except Exception as e:
-        return fallback_rfq, f"❌ {provider} Error: {str(e)}"
+        return fallback_rfq, f"{provider} Error: {str(e)}"
 
-    return fallback_rfq, "⚠️ Provider SDK not available."
+    return fallback_rfq, "Provider SDK not available."
 
 def current_audit(tenant_id: str) -> list[dict]:
     persisted = orbyte_hub.fetch_activity_log(tenant_id, limit=50)
@@ -538,18 +599,18 @@ def record_activity(tenant_id: str, entry: dict):
 # SIDEBAR: REPLICA OF ORBYTE LEFT NAVIGATION (image_d9613d.jpg)
 # ---------------------------------------------------------------------------
 with st.sidebar:
-    st.markdown("""
+    st.markdown(f"""
         <div class="orbyte-logo-row">
             <div class="orbyte-brand">
-                <div class="orbyte-logo-icon">O</div>
+                <div class="orbyte-logo-icon">{svg_icon("layers", 19)}</div>
                 <span>Orbyte</span>
             </div>
-            <span style="color:#94A3B8; font-size:0.9rem;">◧</span>
+            <span style="color:#94A3B8; font-size:0.9rem;" aria-hidden="true">{svg_icon("chevron-down", 16)}</span>
         </div>
     """, unsafe_allow_html=True)
 
     tenant_id = st.selectbox(
-        "🏢 Current organization",
+        ":material/apartment: Current organization",
         options=list(orbyte_hub.TENANTS.keys()),
         format_func=lambda k: orbyte_hub.TENANTS[k]["name"],
     )
@@ -565,16 +626,16 @@ with st.sidebar:
         st.session_state.req_id = None
 
     # Orbyte Tree Navigation Menu showing how InstaQuote fits into the Hub
-    st.markdown("""
+    st.markdown(f"""
         <div class="orbyte-nav-tree">
-            <div class="orbyte-nav-item"><span>🧰 &nbsp;Workspace</span><span>›</span></div>
-            <div class="orbyte-nav-item"><span>👥 &nbsp;Talent Hub</span><span>›</span></div>
-            <div class="orbyte-nav-item" style="color:#0F172A; font-weight:600;"><span>📦 &nbsp;Procurement Hub</span><span>⌄</span></div>
-            <div class="orbyte-nav-active"><span>⚡ InstaQuote RFQ</span><span>●</span></div>
-            <div class="orbyte-nav-sub">📋 &nbsp;Vendor Directory</div>
-            <div class="orbyte-nav-sub">🧾 &nbsp;Purchase Orders</div>
-            <div class="orbyte-nav-item"><span>📊 &nbsp;Reports</span><span>›</span></div>
-            <div class="orbyte-nav-item"><span>⚙️ &nbsp;Settings</span><span>›</span></div>
+            <div class="orbyte-nav-item"><span>{svg_icon("briefcase", 17)}&nbsp;Workspace</span>{svg_icon("chevron", 15)}</div>
+            <div class="orbyte-nav-item"><span>{svg_icon("users", 17)}&nbsp;Talent Hub</span>{svg_icon("chevron", 15)}</div>
+            <div class="orbyte-nav-item" style="color:#0F172A; font-weight:600;"><span>{svg_icon("package", 17)}&nbsp;Procurement Hub</span>{svg_icon("chevron-down", 15)}</div>
+            <div class="orbyte-nav-active"><span>{svg_icon("bolt", 17)}&nbsp;InstaQuote RFQ</span><span class="orbyte-nav-current" aria-label="Current page"></span></div>
+            <div class="orbyte-nav-sub">{svg_icon("clipboard", 16)}&nbsp;Vendor Directory</div>
+            <div class="orbyte-nav-sub">{svg_icon("receipt", 16)}&nbsp;Purchase Orders</div>
+            <div class="orbyte-nav-item"><span>{svg_icon("chart", 17)}&nbsp;Reports</span>{svg_icon("chevron", 15)}</div>
+            <div class="orbyte-nav-item"><span>{svg_icon("settings", 17)}&nbsp;Settings</span>{svg_icon("chevron", 15)}</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -586,21 +647,22 @@ with st.sidebar:
     current_role = st.selectbox("Active Role (RBAC)", options=role_options, index=role_index)
     is_approver = "Approver" in current_role
 
-    with st.expander("🤖 AI Co-Pilot Settings", expanded=False):
+    with st.expander(":material/psychology: AI Co-Pilot Settings", expanded=False):
         provider = st.selectbox("LLM Provider", ["Gemini", "Groq", "OpenRouter"])
         api_key = st.text_input("API Key", type="password", placeholder="Optional (uses template)")
 
     tenant_name = orbyte_hub.TENANTS[tenant_id]["name"]
     role_badge = "Owner (Approver)" if is_approver else "Staff (Drafter)"
-    st.markdown(f"""
-        <div class="orbyte-user-footer">
-            <div class="orbyte-avatar">{tenant_name[:2].upper()}</div>
-            <div style="line-height:1.3;">
-                <div style="font-size:0.82rem; font-weight:600; color:#0F172A;">{tenant_name[:20]}</div>
-                <div style="font-size:0.72rem; color:#64748B;">{role_badge}</div>
+    with st.container(key="sidebar-account-footer"):
+        st.markdown(f"""
+            <div class="orbyte-user-footer">
+                <div class="orbyte-avatar">{tenant_name[:2].upper()}</div>
+                <div style="line-height:1.3;">
+                    <div style="font-size:0.82rem; font-weight:600; color:#0F172A;">{tenant_name[:20]}</div>
+                    <div style="font-size:0.72rem; color:#64748B;">{role_badge}</div>
+                </div>
             </div>
-        </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
 # MAIN ORBYTE DASHBOARD HEADER (Matches image_d9613d.jpg)
@@ -628,7 +690,7 @@ st.markdown(f"""
     <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:14px; border-bottom:1px solid #F1F5F9;">
         <div style="display:flex; align-items:center; gap:14px;">
             <div style="background:#EFF6FF; color:#0284C7; width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; font-weight:700;">
-                📦
+                {svg_icon("package", 21)}
             </div>
             <div>
                 <div style="display:flex; align-items:center;">
@@ -641,7 +703,7 @@ st.markdown(f"""
             </div>
         </div>
         <div style="border:1px solid #CBD5E1; border-radius:8px; padding:6px 14px; font-size:0.82rem; font-weight:600; color:#0284C7; background:#FFFFFF;">
-            SDG 8 & 12 Aligned ↗
+            SDG 8 & 12 Aligned
         </div>
     </div>
     <div style="display:flex; align-items:center; gap:14px; padding-top:14px;">
@@ -673,7 +735,7 @@ st.markdown(f"""
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
         <div style="display:flex; align-items:center; gap:8px; flex:1;">
             <div style="border:1px solid #E2E8F0; border-radius:8px; padding:6px 14px; color:#94A3B8; font-size:0.83rem; width:260px; background:#F8FAFC;">
-                🔍 Search procurement requests...
+                {svg_icon("search", 16)}&nbsp;Search procurement requests...
             </div>
             <span class="orbyte-pill-active">All ({total_actions})</span>
             <span class="orbyte-pill-inactive">Match ({matched_count})</span>
@@ -723,9 +785,9 @@ with col_left:
                 max_lead_days = st.slider("Max Lead Time (Days)", 1, 7, int(req["max_lead_days"]))
             with c2:
                 max_budget_rm = st.number_input("Max Budget (RM)", 10.0, 50000.0, float(req["max_budget_rm"]), step=10.0)
-                prefer_eco = st.checkbox("🌱 Prioritize Eco-Certified", value=req["prefer_eco"])
+                prefer_eco = st.checkbox(":material/eco: Prioritize Eco-Certified", value=req["prefer_eco"])
 
-            run = st.form_submit_button("🔍 Evaluate & Rank Suppliers", type="primary", use_container_width=True)
+            run = st.form_submit_button(":material/search: Evaluate & Rank Suppliers", type="primary", use_container_width=True)
 
         if run:
             st.session_state.req_id = f"REQ-{random.randint(1000, 9999)}"
@@ -805,7 +867,7 @@ with col_approve:
 
         # OWNER INBOX
         if is_approver and st.session_state.pending_approvals:
-            st.warning(f"🔔 **{len(st.session_state.pending_approvals)}** staff submission(s) due for your review.")
+            st.warning(f":material/notifications: **{len(st.session_state.pending_approvals)}** staff submission(s) due for your review.")
             pending_options = [
                 f"{p['req_id']} — {p['supplier']['name']} ({p['req']['quantity']}x)"
                 for p in st.session_state.pending_approvals
@@ -826,7 +888,7 @@ with col_approve:
 
             c_app, c_rej = st.columns(2)
             with c_app:
-                if st.button("✅ Approve & Dispatch ↗", type="primary", use_container_width=True):
+                if st.button(":material/check_circle: Approve & Dispatch :material/open_in_new:", type="primary", use_container_width=True):
                     digits = re.sub(r"\D", "", str(selected_pending["supplier"].get("phone", "")))
                     st.session_state.approved_link = f"https://wa.me/{digits}?text={quote(final_message)}"
                     record_activity(tenant_id, {
@@ -841,7 +903,7 @@ with col_approve:
                         st.session_state.active_request["status"] = "Approved"
                     st.rerun()
             with c_rej:
-                if st.button("❌ Reject", type="secondary", use_container_width=True):
+                if st.button(":material/close: Reject", type="secondary", use_container_width=True):
                     record_activity(tenant_id, {
                         "ID": selected_pending["req_id"],
                         "Role": "Owner",
@@ -874,7 +936,7 @@ with col_approve:
                     format_func=lambda x: {1: "Formal", 2: "Pro", 3: "Standard", 4: "Friendly", 5: "Casual"}[x],
                 )
 
-            if st.button("✨ Generate RFQ Draft", type="secondary", use_container_width=True):
+            if st.button(":material/auto_awesome: Generate RFQ Draft", type="secondary", use_container_width=True):
                 with st.spinner("Drafting quotation request..."):
                     text, status_msg = generate_rfq_text(chosen, st.session_state.active_request, lang_choice, tone_choice, provider, api_key)
                     st.session_state.draft_rfq_message = text
@@ -889,7 +951,7 @@ with col_approve:
 
             if not is_approver:
                 if st.session_state.active_request.get("status") == "Pending Approval":
-                    st.warning("⏳ Pending Owner approval.")
+                    st.warning(":material/schedule: Pending Owner approval.")
                     if st.button("Withdraw Submission", type="secondary", use_container_width=True):
                         st.session_state.pending_approvals = [
                             p for p in st.session_state.pending_approvals if p["req_id"] != st.session_state.req_id
@@ -904,7 +966,7 @@ with col_approve:
                         })
                         st.rerun()
                 else:
-                    if st.button("📨 Submit for Owner Approval ↗", type="primary", use_container_width=True):
+                    if st.button(":material/send: Submit for Owner Approval :material/open_in_new:", type="primary", use_container_width=True):
                         if not edited_rfq.strip():
                             st.error("Click 'Generate RFQ Draft' first.")
                         else:
@@ -924,7 +986,7 @@ with col_approve:
                             })
                             st.rerun()
             else:
-                if st.button("✅ Approve & Open WhatsApp ↗", type="primary", use_container_width=True):
+                if st.button(":material/check_circle: Approve & Open WhatsApp :material/open_in_new:", type="primary", use_container_width=True):
                     if not edited_rfq.strip():
                         st.error("Click 'Generate RFQ Draft' first.")
                     else:
@@ -960,11 +1022,11 @@ with col_outcome:
             st.markdown(f"""
             <div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:10px; padding:12px 16px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
-                    <div style="font-weight:600; font-size:0.88rem; color:#065F46;">✅ WhatsApp RFQ Ready for Dispatch</div>
+                    <div style="font-weight:600; font-size:0.88rem; color:#065F46;">{svg_icon("check-circle", 16)} WhatsApp RFQ Ready for Dispatch</div>
                     <div style="font-size:0.78rem; color:#047857;">Approved by SME Owner • Pre-filled quotation link generated</div>
                 </div>
                 <a href="{st.session_state.approved_link}" target="_blank" style="background:#059669; color:white; text-decoration:none; padding:7px 14px; border-radius:8px; font-size:0.82rem; font-weight:600;">
-                    Open WhatsApp ↗
+                    Open WhatsApp {svg_icon("external", 14)}
                 </a>
             </div>
             """, unsafe_allow_html=True)
@@ -989,11 +1051,11 @@ with col_outcome:
                     </div>
                     <div class="orbyte-activity-role" style="color:#64748B; font-size:0.8rem;">{role_txt}</div>
                     <div>
-                        <span class="{badge_class}">⏱ {status_txt}</span>
+                        <span class="{badge_class}">{svg_icon("clock", 14)} {status_txt}</span>
                     </div>
                     <div style="color:#334155; font-size:0.8rem;">{ts_txt}</div>
                     <div class="orbyte-activity-logged" style="text-align:right; color:#0284C7; font-weight:600; font-size:0.8rem;">
-                        Logged ↗
+                        Logged {svg_icon("external", 12)}
                     </div>
                 </div>
                 """, unsafe_allow_html=True)

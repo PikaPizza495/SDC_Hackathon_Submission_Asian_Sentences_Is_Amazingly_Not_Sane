@@ -1,6 +1,5 @@
 run = "streamlit run app.py --server.port 8501 --server.address 0.0.0.0"
-
-modules = ["python-3.11"]
+modules = ["python-3.11", "nodejs-24"]
 [nix]
 channel = "stable-25_05"
 packages = ["glibcLocales"]
