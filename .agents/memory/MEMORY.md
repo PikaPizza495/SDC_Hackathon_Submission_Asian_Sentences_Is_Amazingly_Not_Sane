@@ -1,0 +1,1 @@
+- [Sidebar account visibility](sidebar-account-visibility.md) — account must remain stationary and visible while navigation and settings scroll independently.

@@ -80,21 +80,50 @@ st.markdown("""
         padding-right: 1.1rem !important;
     }
 
-    /* Keep the account visible at the bottom while sidebar content scrolls. */
+    /* Only the controls scroll; the account is a separate, non-scrolling flex child. */
+    section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+        height: 100dvh;
+        overflow: hidden !important;
+        display: flex;
+        flex-direction: column;
+    }
+    section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+        flex: 1 1 0;
+        min-height: 0;
+        overflow: hidden !important;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 12px;
+    }
+    section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] > div {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 0;
+        min-height: 0;
+        overflow: hidden;
+    }
     section[data-testid="stSidebar"] [data-testid="stVerticalBlock"]:has(.st-key-sidebar-account-footer) {
         display: flex !important;
         flex-direction: column !important;
-        min-height: calc(100dvh - 110px);
+        flex: 1 1 0;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
     }
-    section[data-testid="stSidebar"] .st-key-sidebar-account-footer,
-    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:has(.st-key-sidebar-account-footer) {
-        margin-top: auto !important;
+    section[data-testid="stSidebar"] .st-key-sidebar-scroll-content,
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:has(> .st-key-sidebar-scroll-content) {
+        flex: 1 1 0 !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+    }
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:has(.st-key-sidebar-account-footer),
+    section[data-testid="stSidebar"] .st-key-sidebar-account-footer {
         flex: 0 0 auto;
-        position: sticky;
-        bottom: 0;
-        z-index: 10;
+        min-height: 72px;
         background: #FFFFFF;
-        padding-bottom: 12px;
     }
 
     /* Force all inputs, dropdowns, and number boxes to be crisp white (never black!) */
@@ -603,7 +632,7 @@ def record_activity(tenant_id: str, entry: dict):
 # ---------------------------------------------------------------------------
 # SIDEBAR: REPLICA OF ORBYTE LEFT NAVIGATION (image_d9613d.jpg)
 # ---------------------------------------------------------------------------
-with st.sidebar:
+def render_sidebar_controls():
     st.markdown(f"""
         <div class="orbyte-logo-row">
             <div class="orbyte-brand">
@@ -655,6 +684,13 @@ with st.sidebar:
     with st.expander(":material/psychology: AI Co-Pilot Settings", expanded=False):
         provider = st.selectbox("LLM Provider", ["Gemini", "Groq", "OpenRouter"])
         api_key = st.text_input("API Key", type="password", placeholder="Optional (uses template)")
+
+    return tenant_id, is_approver, provider, api_key
+
+
+with st.sidebar:
+    with st.container(key="sidebar-scroll-content"):
+        tenant_id, is_approver, provider, api_key = render_sidebar_controls()
 
     tenant_name = orbyte_hub.TENANTS[tenant_id]["name"]
     role_badge = "Owner (Approver)" if is_approver else "Staff (Drafter)"
