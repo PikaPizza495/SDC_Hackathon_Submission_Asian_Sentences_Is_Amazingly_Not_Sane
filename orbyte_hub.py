@@ -20,7 +20,7 @@ TENANTS = {
         "preset": {
             "trigger_source": "Orbyte Inventory Low-Stock Alert",
             "category": "Packaging",
-            "item_name": "Kraft Paper Bowls (500ml)",
+            "item_name": "Kraft Paper Bowls (500ml/750ml) & Eco Containers",
             "quantity": 400,
             "max_budget_rm": 180.0,
             "max_lead_days": 3,
@@ -35,7 +35,7 @@ TENANTS = {
         "preset": {
             "trigger_source": "Staff New Product Sourcing Request",
             "category": "F&B Ingredients",
-            "item_name": "Arabica Coffee Beans (1kg)",
+            "item_name": "Arabica & Liberica Coffee Beans",
             "quantity": 10,
             "max_budget_rm": 450.0,
             "max_lead_days": 4,
@@ -50,7 +50,7 @@ TENANTS = {
         "preset": {
             "trigger_source": "POS Counter Consumables Alert",
             "category": "Store Operations",
-            "item_name": "Thermal Receipt Rolls",
+            "item_name": "80mm Thermal Receipt Rolls (Box of 50)",
             "quantity": 3,
             "max_budget_rm": 210.0,
             "max_lead_days": 2,
