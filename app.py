@@ -80,7 +80,7 @@ st.markdown("""
         padding-right: 1.1rem !important;
     }
 
-    /* Footer stays in normal flow: pushed down on tall screens, scrollable on short ones. */
+    /* Keep the account visible at the bottom while sidebar content scrolls. */
     section[data-testid="stSidebar"] [data-testid="stVerticalBlock"]:has(.st-key-sidebar-account-footer) {
         display: flex !important;
         flex-direction: column !important;
@@ -90,6 +90,11 @@ st.markdown("""
     section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:has(.st-key-sidebar-account-footer) {
         margin-top: auto !important;
         flex: 0 0 auto;
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+        background: #FFFFFF;
+        padding-bottom: 12px;
     }
 
     /* Force all inputs, dropdowns, and number boxes to be crisp white (never black!) */
