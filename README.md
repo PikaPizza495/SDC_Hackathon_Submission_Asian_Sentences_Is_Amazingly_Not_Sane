@@ -11,8 +11,7 @@
 | ---------------------- | ------------------------------------------- |
 | **Team Name**          | Asian Sentences Is Amazingly Not Sane       |
 | **Team Domain**        | Domain 2                                    |
-| **SDG Track (1–17)**   | e.g. SDG 11 — Sustainable Cities and Communities |
-| **Team Leader**        | Leader Name                                 |
+| **SDG Track (1–17)**   | SDG 8 Decent Work And Economic Growth       |
+| **Team Leader**        | Teng Min Jie                                |
 | **University**         | Asia Pacific University                     |
 | **Number of Members**  | 5                                           |
-| **Test Segment**      | Test test |
