@@ -133,11 +133,11 @@ https://replit.com/@tengminjie878/SDCHackathonSubmissionAsianSentencesIsAmazingl
 
 | **Name**      | **Roles**    | **Github**                      |
 | ---           | ---          | ---                             |
-| Teng Min Jie  | Team Lead    | https://github.com/TENGMJ87845  |
-| Lee Jun Yi    | Team Member  | https://github.com/LeeJY14      | 
-| Tenka         | Team Member  | https://github.com/Tenka1412    |
-| Xiang         | Team Member  | https://github.com/xiang878787  |
-| Wong Pei Zhan | Team Member  | https://github.com/PikaPizza495 |
+| Teng Min Jie  | Team Lead/Backend   | https://github.com/TENGMJ87845  |
+| Lee Jun Yi    | Submission Files  | https://github.com/LeeJY14      | 
+| Tenka         | Backend  | https://github.com/Tenka1412    |
+| Xiang         | Demo/Pitch Video Creation | https://github.com/xiang878787  |
+| Wong Pei Zhan | Github Repo Management  | https://github.com/PikaPizza495 |
 
 ## Submission Checklist
 
