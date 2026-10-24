@@ -100,7 +100,7 @@ User ──► Replit (App / API) ──► Response returned to user
 
 - **Development**: Replit is used for Database and Website Development
 
-Proof of Use:
+Proof of Use: [`Submission/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_POU.pdf`](Submission/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_POU.pdf)
 
 ---
 
