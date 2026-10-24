@@ -148,7 +148,7 @@ Proof of Use: [`Submission/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_
 - [ ] Technology declaration completed (`SDC2026_TeamName_TechDeclaration.pdf`)
 - [ ] Submission files renamed with your team name (replace `TeamName`)
 - [✓] "How to Run" steps verified
-- [ ] No API keys or secrets committed to the repository
+- [✓] No API keys or secrets committed to the repository
 
 ## License
 
