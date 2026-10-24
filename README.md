@@ -65,7 +65,9 @@ Our project, InstaQuote uses AI to help SMEs much more easily find suitable supp
 |   ├── orbyte_hub.py
 |   ├── seed_suppliers.py
 |   ├── supplier.csv                      # list of generated suppliers
-│   └── supplier.json            
+│   └── supplier.json
+├── Slides/
+|   └── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Pitch_Slides.pdf     # Pitching slides
 ├── Submission/                           # Required submission documents
 │   ├── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Preliminary.pdf      # Preliminary submission
 │   ├── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_TechDeclaration.pdf  # Technology declaration
