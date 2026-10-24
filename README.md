@@ -79,7 +79,6 @@ Our project, InstaQuote uses AI to help SMEs much more easily find suitable supp
 └── README.md
 ```
 
-> to be changed
 
 ### Architecture
 
