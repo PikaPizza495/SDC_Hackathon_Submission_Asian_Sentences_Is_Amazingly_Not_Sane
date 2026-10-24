@@ -374,6 +374,19 @@ st.markdown("""
         font-weight: 700;
         font-size: 0.85rem;
     }
+    /* Keep card borders from being clipped at fractional zoom / odd window sizes */
+    [data-testid="stMain"] div[data-testid="stVerticalBlockBorderWrapper"],
+    [data-testid="stMain"] div[data-testid="stColumn"],
+    [data-testid="stMain"] div[data-testid="stHorizontalBlock"],
+    [data-testid="stMain"] div[data-testid="stElementContainer"] {
+        overflow: visible !important;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        box-sizing: border-box !important;
+    }
+    .block-container {
+        padding-bottom: 4rem !important;  /* room under the last card */
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -448,8 +461,10 @@ def _init_state():
         "last_tenant": None,
         "active_request": None,
         "pending_approvals": [],
-        "approved_link": None,
+        "approved_links": [],
+        "tenant_store": {},
         "req_id": None,
+        "draft_vendor": None,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -680,6 +695,16 @@ def generate_rfq_text(top: dict, req: dict, lang: str, tone: int, provider: str,
 
     return fallback_rfq, f"{provider} returned no text ({'; '.join(skipped) or 'no response'}). Using built-in template."
 
+def add_dispatch(req_id: str, supplier: str, link: str) -> bool:
+    """Store a WhatsApp dispatch. Re-approving the same request + vendor replaces it
+    instead of adding a duplicate. Returns True if it was a new dispatch."""
+    links = st.session_state.approved_links
+    is_new = not any(d["req_id"] == req_id and d["supplier"] == supplier for d in links)
+    links = [d for d in links if not (d["req_id"] == req_id and d["supplier"] == supplier)]
+    links.insert(0, {"req_id": req_id, "supplier": supplier, "link": link})
+    st.session_state.approved_links = links[:10]  # bounded, newest first
+    return is_new
+
 def current_audit(tenant_id: str) -> list[dict]:
     persisted = orbyte_hub.fetch_activity_log(tenant_id, limit=50)
     return persisted if persisted else st.session_state.audit_logs.get(tenant_id, [])
@@ -709,14 +734,25 @@ def render_sidebar_controls():
     )
 
     if st.session_state.last_tenant != tenant_id:
+        per_tenant_keys = ["active_request", "matched_suppliers", "draft_rfq_message", "draft_vendor", "ai_status_msg", "pending_approvals", "approved_links", "req_id"]
+        store = st.session_state.tenant_store
+        old = st.session_state.last_tenant
+        if old is not None:  # save the organization we're leaving
+            store[old] = {k: st.session_state[k] for k in per_tenant_keys}
+        saved = store.get(tenant_id)
+        if saved:  # restore where we left off
+            for k in per_tenant_keys:
+                st.session_state[k] = saved[k]
+        else:  # first visit to this organization: fresh state
+            st.session_state.active_request = orbyte_hub.get_inventory_alert(tenant_id)
+            st.session_state.matched_suppliers = None
+            st.session_state.draft_rfq_message = ""
+            st.session_state.ai_status_msg = ""
+            st.session_state.pending_approvals = []
+            st.session_state.approved_links = []
+            st.session_state.req_id = None
+            st.session_state.draft_vendor = None
         st.session_state.last_tenant = tenant_id
-        st.session_state.active_request = orbyte_hub.get_inventory_alert(tenant_id)
-        st.session_state.matched_suppliers = None
-        st.session_state.draft_rfq_message = ""
-        st.session_state.ai_status_msg = ""
-        st.session_state.pending_approvals = []
-        st.session_state.approved_link = None
-        st.session_state.req_id = None
 
     # Orbyte Tree Navigation Menu showing how InstaQuote fits into the Hub
     st.markdown(f"""
@@ -735,9 +771,12 @@ def render_sidebar_controls():
     st.divider()
 
     role_options = ["Staff (Draft Only)", "SME Owner / Manager (Approver)"]
-    role_default = orbyte_hub.get_role(tenant_id)
-    role_index = 1 if "Owner" in role_default else 0
-    current_role = st.selectbox("Active Role (RBAC)", options=role_options, index=role_index)
+    current_role = st.selectbox(
+        "Active Role (RBAC)",
+        options=role_options,
+        index=0,  # always start as Staff (Draft Only)
+        key=f"role_{tenant_id}",  # resets to Staff whenever you switch organization
+    )
     is_approver = "Approver" in current_role
 
     with st.expander(":material/psychology: AI Co-Pilot Settings", expanded=False):
@@ -828,29 +867,48 @@ st.markdown(f"""
 # SECOND CARD: PENDING ACTIONS WORKSPACE (Replica of "Pending Actions" Card)
 # ---------------------------------------------------------------------------
 pending_count = len(st.session_state.pending_approvals)
-audit_entries = current_audit(tenant_id)
-total_actions = pending_count + (1 if matched_count > 0 else 0)
 
-st.markdown(f"""
-<div class="orbyte-card" style="margin-bottom: 12px; padding-bottom: 14px;">
-    <div style="font-weight:700; font-size:1.02rem; color:#0F172A; margin-bottom:14px;">Pending Actions</div>
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-        <div style="display:flex; align-items:center; gap:8px; flex:1;">
-            <div style="border:1px solid #E2E8F0; border-radius:8px; padding:6px 14px; color:#94A3B8; font-size:0.83rem; width:260px; background:#F8FAFC;">
-                {svg_icon("search", 16)}&nbsp;Search procurement requests...
-            </div>
-            <span class="orbyte-pill-active">All ({total_actions})</span>
-            <span class="orbyte-pill-inactive">Match ({matched_count})</span>
-            <span class="orbyte-pill-inactive">Pending Approval ({pending_count})</span>
-            <span class="orbyte-pill-inactive">Completed ({len(audit_entries)})</span>
-        </div>
-        <div style="border:1px solid #E2E8F0; border-radius:8px; padding:5px 12px; font-size:0.8rem; color:#475569; font-weight:500;">
-            Role: <strong>{"Owner (Approver)" if is_approver else "Staff (Draft Only)"}</strong>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# Hide "Matched" entries entirely (also covers ones already saved earlier in the session or DB)
+audit_entries = [e for e in current_audit(tenant_id) if e.get("Status") != "Matched"]
 
+# Current state of each (request + vendor). audit_entries are newest-first,
+# so the first entry we see for a pair is its latest status.
+vendor_latest = {}
+for e in audit_entries:
+    vendor_latest.setdefault((e.get("ID"), e.get("Item")), e)
+
+filter_items = {
+    "All": audit_entries,
+    "Pending Approval": [e for e in vendor_latest.values() if e.get("Status") == "Pending Approval"],
+    "Completed": [e for e in vendor_latest.values() if e.get("Status") != "Pending Approval"],
+}
+
+# Safety: if the saved filter no longer exists (e.g. "Match" from before), fall back to All
+if st.session_state.get("action_filter") not in filter_items:
+    st.session_state.action_filter = "All"
+
+with st.container(border=True):
+    st.markdown('<div style="font-weight:700; font-size:1.02rem; color:#0F172A;">Pending Actions</div>', unsafe_allow_html=True)
+    c_search, c_filter, c_role = st.columns([1.4, 2.4, 1.2], vertical_alignment="center")
+    with c_search:
+        search_q = st.text_input("Search", placeholder="Search procurement requests...",
+                                label_visibility="collapsed", key="action_search")
+    with c_filter:
+        active_filter = st.radio("Filter", list(filter_items), horizontal=True,
+                                label_visibility="collapsed", key="action_filter",
+                                format_func=lambda f: f"{f} ({len(filter_items[f])})")
+    with c_role:
+        st.markdown(
+            f'<div style="border:1px solid #E2E8F0; border-radius:8px; padding:5px 12px; font-size:0.8rem; color:#475569; font-weight:500; text-align:center;">'
+            f'Role: <strong>{"Owner (Approver)" if is_approver else "Staff (Draft Only)"}</strong></div>',
+            unsafe_allow_html=True,
+        )
+
+# Rows shown in "My Submissions & Activity Log"
+visible_entries = filter_items[active_filter]
+q = search_q.strip().lower()
+if q:
+    visible_entries = [e for e in visible_entries if q in " ".join(str(v) for v in e.values()).lower()]
 # ---------------------------------------------------------------------------
 # STEP 1 & STEP 2: SOURCING FORM & RECOMMENDED SUPPLIERS
 # ---------------------------------------------------------------------------
@@ -902,13 +960,6 @@ with col_left:
             st.session_state.matched_suppliers = ranked
             st.session_state.draft_rfq_message = ""
             st.session_state.approved_link = None
-            record_activity(tenant_id, {
-                "ID": st.session_state.req_id,
-                "Role": "System",
-                "Action": f"Matched {len(ranked)} vendors",
-                "Item": f"{quantity}x {item_name[:22]}",
-                "Status": "Matched"
-            })
             st.rerun()
 
 with col_right:
@@ -977,6 +1028,7 @@ with col_approve:
                 "Select submission to approve:",
                 options=range(len(pending_options)),
                 format_func=lambda i: pending_options[i],
+                index=len(pending_options) - 1,  # newest submission first
             )
             selected_pending = st.session_state.pending_approvals[selected_pending_idx]
 
@@ -984,14 +1036,18 @@ with col_approve:
                 "WhatsApp RFQ Message:",
                 value=selected_pending["message"],
                 height=155,
-                key="owner_edit",
+                key=f"owner_edit_{selected_pending['req_id']}_{abs(hash(selected_pending['message']))}",
             )
 
             c_app, c_rej = st.columns(2)
             with c_app:
                 if st.button(":material/check_circle: Approve & Dispatch :material/open_in_new:", type="primary", use_container_width=True):
                     digits = re.sub(r"\D", "", str(selected_pending["supplier"].get("phone", "")))
-                    st.session_state.approved_link = f"https://wa.me/{digits}?text={quote(final_message)}"
+                    add_dispatch(
+                        selected_pending["req_id"],
+                        selected_pending["supplier"]["name"],
+                        f"https://wa.me/{digits}?text={quote(final_message)}",
+                    )
                     record_activity(tenant_id, {
                         "ID": selected_pending["req_id"],
                         "Role": "Owner",
@@ -1025,6 +1081,12 @@ with col_approve:
             )
             chosen = records[idx]
 
+            # A draft belongs to the vendor it was written for. Switching vendor clears it.
+            if st.session_state.draft_vendor != chosen["name"]:
+                st.session_state.draft_rfq_message = ""
+                st.session_state.ai_status_msg = ""
+                st.session_state.draft_vendor = chosen["name"]
+
             c_lang, c_tone = st.columns(2)
             with c_lang:
                 lang_choice = st.selectbox("Language", ["English + Bahasa Melayu", "English Only", "Bahasa Melayu Only"])
@@ -1050,12 +1112,17 @@ with col_approve:
             st.session_state.draft_rfq_message = edited_rfq
 
             if not is_approver:
-                if st.session_state.active_request.get("status") == "Pending Approval":
+                is_pending_here = any(
+                    p["req_id"] == st.session_state.req_id and p["supplier"]["name"] == chosen["name"]
+                    for p in st.session_state.pending_approvals
+                    )
+                if is_pending_here:
                     st.warning(":material/schedule: Pending Owner approval.")
                     if st.button("Withdraw Submission", type="secondary", use_container_width=True):
                         st.session_state.pending_approvals = [
-                            p for p in st.session_state.pending_approvals if p["req_id"] != st.session_state.req_id
-                        ]
+                            p for p in st.session_state.pending_approvals
+                            if not (p["req_id"] == st.session_state.req_id and p["supplier"]["name"] == chosen["name"])
+                            ]
                         st.session_state.active_request["status"] = "Cancelled"
                         record_activity(tenant_id, {
                             "ID": st.session_state.req_id,
@@ -1091,15 +1158,20 @@ with col_approve:
                         st.error("Click 'Generate RFQ Draft' first.")
                     else:
                         digits = re.sub(r"\D", "", str(chosen.get("phone", "")))
-                        st.session_state.approved_link = f"https://wa.me/{digits}?text={quote(edited_rfq)}"
+                        is_new = add_dispatch(
+                            st.session_state.req_id,
+                            chosen["name"],
+                            f"https://wa.me/{digits}?text={quote(edited_rfq)}",
+                        )
                         st.session_state.active_request["status"] = "Approved"
-                        record_activity(tenant_id, {
-                            "ID": st.session_state.req_id,
-                            "Role": "Owner",
-                            "Action": "Approved & Dispatched RFQ",
-                            "Item": chosen["name"],
-                            "Status": "Approved"
-                        })
+                        if is_new:  # only log the first approval, not repeat clicks
+                            record_activity(tenant_id, {
+                                "ID": st.session_state.req_id,
+                                "Role": "Owner",
+                                "Action": "Approved & Dispatched RFQ",
+                                "Item": chosen["name"],
+                                "Status": "Approved"
+                            })
                         st.rerun()
         else:
             st.caption("Evaluate suppliers in Step 1 to begin drafting an RFQ.")
@@ -1118,22 +1190,24 @@ with col_outcome:
             </div>
         """, unsafe_allow_html=True)
 
-        if st.session_state.approved_link:
+        for dispatch in st.session_state.approved_links[:5]:  # newest first
             st.markdown(f"""
-            <div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:10px; padding:12px 16px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:10px; padding:12px 16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <div style="font-weight:600; font-size:0.88rem; color:#065F46;">{svg_icon("check-circle", 16)} WhatsApp RFQ Ready for Dispatch</div>
-                    <div style="font-size:0.78rem; color:#047857;">Approved by SME Owner • Pre-filled quotation link generated</div>
+                    <div style="font-size:0.78rem; color:#047857;">{dispatch['req_id'].lower()} • {dispatch['supplier']} • Approved by SME Owner</div>
                 </div>
-                <a href="{st.session_state.approved_link}" target="_blank" style="background:#059669; color:white; text-decoration:none; padding:7px 14px; border-radius:8px; font-size:0.82rem; font-weight:600;">
+                <a href="{dispatch['link']}" target="_blank" style="background:#059669; color:white; text-decoration:none; padding:7px 14px; border-radius:8px; font-size:0.82rem; font-weight:600;">
                     Open WhatsApp {svg_icon("external", 14)}
                 </a>
             </div>
             """, unsafe_allow_html=True)
 
         # Render Activity Log Rows in the exact style of Orbyte's "My Submissions" table!
-        if audit_entries:
-            for item in audit_entries[:6]:
+        if visible_entries:
+            shown = visible_entries[:10]
+            for n, item in enumerate(shown):
+                is_last = n == len(shown) - 1
                 req_id_txt = item.get("ID", "REQ-001")
                 role_txt = item.get("Role", "You")
                 action_txt = item.get("Action", "Submission")
@@ -1144,7 +1218,7 @@ with col_outcome:
                 badge_class = "orbyte-status-approved" if "Approved" in status_txt or "Sent" in status_txt else "orbyte-status-pending"
 
                 st.markdown(f"""
-                <div class="orbyte-activity-row">
+                <div class="orbyte-activity-row" style="{'border-bottom:none;' if is_last else ''}">
                     <div>
                         <div style="font-weight:600; color:#0F172A;">{action_txt}</div>
                         <div style="font-size:0.76rem; color:#64748B;">{req_id_txt.lower()} • {vendor_txt}</div>
@@ -1159,6 +1233,8 @@ with col_outcome:
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+        elif audit_entries:
+            st.caption("No requests match your search or filter.")
         else:
             st.markdown("""
             <div style="padding:18px 4px; color:#64748B; font-size:0.84rem;">
