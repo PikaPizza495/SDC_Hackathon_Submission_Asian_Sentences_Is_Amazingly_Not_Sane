@@ -71,8 +71,7 @@ Our project, InstaQuote uses AI to help SMEs much more easily find suitable supp
 ├── Submission/                           # Required submission documents
 │   ├── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Preliminary.pdf      # Preliminary submission
 │   ├── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_TechDeclaration.pdf  # Technology declaration
-│   ├── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_POU.pdf       # Replit proof of use
-│   └── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Runpod_POU.pdf       # RunPod proof of use
+│   └── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_POU.pdf       # Replit proof of use
 ├── _pycache_/
 │   └── orbyte_hub.cpython-314.pyc
 ├── .replit                               # Replit run configuration
@@ -146,7 +145,7 @@ https://replit.com/@tengminjie878/SDCHackathonSubmissionAsianSentencesIsAmazingl
 - [✓] Slide deck link added
 - [✓] Demo video link added
 - [✓] Replit used, with proof of use in `submission/`
-- [ ] Preliminary submission completed (`SDC2026_TeamName_Preliminary.pdf`)
+- [✓] Preliminary submission completed (`SDC2026_TeamName_Preliminary.pdf`)
 - [ ] Technology declaration completed (`SDC2026_TeamName_TechDeclaration.pdf`)
 - [ ] Submission files renamed with your team name (replace `TeamName`)
 - [✓] "How to Run" steps verified
