@@ -20,8 +20,8 @@ Our project targets SMEs to connect them with suppliers much more easily with a 
 
 | Resource          | Link                                           |
 | ----------------- | ---------------------------------------------- |
-| GitHub Repository | https://github.com/your-username/your-project  |
-| Live Demo         | https://your-project.replit.app                |
+| GitHub Repository | https://github.com/PikaPizza495/SDC_Hackathon_Submission_Asian_Sentences_Is_Amazingly_Not_Sane/tree/main  |
+| Live Demo         | https://replit.com/join#t=ndujmumuxivpsyq-tengminjie878               |
 | Slide Deck        | https://example.com/slides                     |
 | Demo Video        | https://example.com/demo-video                 |
 
