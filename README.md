@@ -77,8 +77,8 @@ Our project, InstaQuote uses AI to help SMEs much more easily find suitable supp
 │   └── orbyte_hub.cpython-314.pyc
 ├── .replit                               # Replit run configuration
 ├── LICENSE
-├── requirements.txt                      # Python dependencies
-└── README.md
+├── README.md
+└── requirements.txt                      # Python dependencies
 ```
 
 
