@@ -90,6 +90,12 @@ User ──► Replit (App / API) ──► Response returned to user
 
 ## How To Run
 
+### Run on Replit
+
+1. Open https://replit.com/join#t=ndujmumuxivpsyq-tengminjie878 shown in the links section. (Will redirect you to our replit page)
+
+## How to Use
+
 1. 
 
 ---
@@ -141,7 +147,7 @@ Proof of Use: [`Submission/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_
 - [ ] Preliminary submission completed (`SDC2026_TeamName_Preliminary.pdf`)
 - [ ] Technology declaration completed (`SDC2026_TeamName_TechDeclaration.pdf`)
 - [ ] Submission files renamed with your team name (replace `TeamName`)
-- [ ] "How to Run" steps verified
+- [✓] "How to Run" steps verified
 - [ ] No API keys or secrets committed to the repository
 
 ## License
