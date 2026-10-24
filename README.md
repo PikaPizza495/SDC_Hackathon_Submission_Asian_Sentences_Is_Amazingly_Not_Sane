@@ -60,22 +60,22 @@ Our project, InstaQuote uses AI to help SMEs much more easily find suitable supp
 ├── .streamlit
 |   └── config.toml               
 ├── SRC/
-│   ├── app.py              # Application entry point
+│   ├── app.py                            # Application entry point
 |   ├── generate_suppliers.py             # Generates suppliers
 |   ├── orbyte_hub.py
 |   ├── seed_suppliers.py
-|   ├── supplier.csv             # list of generated suppliers
+|   ├── supplier.csv                      # list of generated suppliers
 │   └── supplier.json            
-├── Submission/              # Required submission documents
+├── Submission/                           # Required submission documents
 │   ├── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Preliminary.pdf      # Preliminary submission
 │   ├── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_TechDeclaration.pdf  # Technology declaration
 │   ├── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_POU.pdf       # Replit proof of use
 │   └── SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Runpod_POU.pdf       # RunPod proof of use
 ├── _pycache_/
 │   └── orbyte_hub.cpython-314.pyc
-├── .replit                  # Replit run configuration
+├── .replit                               # Replit run configuration
 ├── LICENSE
-├── requirements.txt         # Python dependencies
+├── requirements.txt                      # Python dependencies
 └── README.md
 ```
 
