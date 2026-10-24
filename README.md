@@ -122,6 +122,16 @@ Proof of Use: [`Submission/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_
 - Supplier performance analytics and relationship management
 - Live Orbyte ecosystem integration
 
+## Team
+
+| **Name** | **Roles** | **Github** |
+| Teng Min Jie | Team Lead | https://github.com/TENGMJ87845 |
+| Lee Jun Yi | Team Member | https://github.com/LeeJY14 |
+| Tenka | Team Member | https://github.com/Tenka1412 |
+| Xiang | Team Member | https://github.com/xiang878787 |
+| Wong Pei Zhan | Team Member | https://github.com/PikaPizza495 |
+
+
 ## License
 
 This project is licensed under the [Apache License 2.0](LICENSE).
