@@ -19,6 +19,7 @@ Our project targets SMEs to connect them with suppliers much more easily with a 
 | Resource          | Link                                           |
 | ----------------- | ---------------------------------------------- |
 | GitHub Repository | https://github.com/PikaPizza495/SDC_Hackathon_Submission_Asian_Sentences_Is_Amazingly_Not_Sane  |
+| Replit Project | https://replit.com/@tengminjie878/SDCHackathonSubmissionAsianSentencesIsAmazinglyNotSa |
 | Live Demo         | https://instaquote-orbyte.replit.app/               |
 | Slide Deck        | [`Slides/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Pitch_Slides.pdf`](Slides/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Pitch_Slides.pdf)                   |
 | Demo Video        | https://www.youtube.com/watch?v=SG85QGIhGEE               |
