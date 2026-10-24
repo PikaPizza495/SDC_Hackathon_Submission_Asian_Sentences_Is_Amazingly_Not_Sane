@@ -102,6 +102,8 @@ User ──► Replit (App / API) ──► Response returned to user
 
 Proof of Use: [`Submission/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_POU.pdf`](Submission/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_POU.pdf)
 
+## Runpod Was Not Used For This Project
+
 ---
 
 ## Challenges and Learnings
