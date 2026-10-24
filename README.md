@@ -43,3 +43,39 @@ Our project, InstaQuote uses AI to help SMEs much more easily find suitable supp
 - **AI-drafted WhatsApp quotation requests** — Helps SMEs for Quotation Request from suppliers
 
 ---
+
+## Project Structure
+
+```
+.
+├── docs/                    # Screenshots, diagrams
+├── runpod/
+│   └── handler.py           # RunPod serverless handler (GPU workload)
+├── src/
+│   ├── main.py              # Application entry point
+│   └── utils.py             # Helper functions
+├── submission/              # Required submission documents
+│   ├── SDC2026_TeamName_Preliminary.pdf      # Preliminary submission
+│   ├── SDC2026_TeamName_TechDeclaration.pdf  # Technology declaration
+│   ├── SDC2026_TeamName_Replit_POU.pdf       # Replit proof of use
+│   └── SDC2026_TeamName_Runpod_POU.pdf       # RunPod proof of use
+├── tests/
+│   └── test_utils.py        # Unit tests
+├── .env.example             # Example environment variables
+├── .gitignore
+├── .replit                  # Replit run configuration
+├── LICENSE
+├── requirements.txt         # Python dependencies
+└── README.md
+```
+
+> to be changed
+
+### Architecture
+
+```
+User ──► Replit (App / API) ──► Response returned to user
+                
+```
+
+---
