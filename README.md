@@ -42,14 +42,4 @@ Our project, InstaQuote uses AI to help SMEs much more easily find suitable supp
 - **Transparent Supplier Ranking** — Ranks each suppliers and gives a clear reason on their ranking
 - **AI-drafted WhatsApp quotation requests** — Helps SMEs for Quotation Request from suppliers
 
-### Tech Stack
-
-| Layer         | Technology                   |
-| ------------- | ---------------------------- |
-| Frontend      | e.g. HTML, React             |
-| Backend       | e.g. Python, Flask / FastAPI |
-| Database      | e.g. PostgreSQL, SQLite      |
-| AI / Compute  | RunPod (GPU)                 |
-| Hosting / Dev | Replit                       |
-
 ---
