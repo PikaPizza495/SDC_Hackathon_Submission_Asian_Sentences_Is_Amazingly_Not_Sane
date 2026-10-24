@@ -94,9 +94,7 @@ User ──► Replit (App / API) ──► Response returned to user
 
 1. Open https://replit.com/join#t=ndujmumuxivpsyq-tengminjie878 shown in the links section. (Will redirect you to our replit page)
 
-## How to Use
-
-1. 
+(Note: The suppliers provided can be found in ['SRC/suppliers.csv'](SRC/suppliers.csv)
 
 ---
 
