@@ -122,4 +122,6 @@ Proof of Use: [`Submission/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_
 - Supplier performance analytics and relationship management
 - Live Orbyte ecosystem integration
 
+## License
 
+This project is licensed under the [Apache License 2.0](LICENSE).
