@@ -38,9 +38,19 @@ Our project, InstaQuote uses AI to help SMEs much more easily find suitable supp
 
 ### Key Features
 
-- **Integrated Database System** — This feature connects the inventory of the inventory of the organization
-- **Transparent Supplier Ranking** — Ranks each suppliers and gives a clear reason on their ranking
-- **AI-drafted WhatsApp quotation requests** — Helps SMEs for Quotation Request from suppliers
+- **Staff / Owner Role Switcher** – Simulate Staff (Requester) and SME Owner (Approver) with different permissions.
+- **Business Needs / Procurement Request Form** – Staff can enter the product or service needed, quantity, maximum budget (RM), and preferred location.
+- **Supplier & Business Directory** – Store synthetic supplier and business data, including company names, industries, products/services, prices, MOQ, delivery times, reliability ratings, locations, and contact details.
+- **Smart Supplier & Business Discovery** – Help SMEs discover suitable suppliers and business contacts based on their specific needs, even if they do not know whom to approach.
+- **Intelligent Matching & Filtering** – Automatically match and filter suppliers based on product/service compatibility, budget, MOQ, location, and delivery availability.
+- **Top 3 Business Recommendations** – Recommend the three most suitable suppliers based on pricing, delivery speed, reliability, and business compatibility.
+- **Business Profiles** – Display supplier information, products/services, locations, contact channels, and other relevant details to help SMEs evaluate potential business connections.
+- **Explainable Recommendations** – Show why each supplier is recommended or rejected, helping SMEs make informed decisions.
+- **AI Connection / RFQ Generator** – Generate editable, personalized business introduction messages or quotation requests (RFQs) in English or Bahasa Melayu.
+- **Owner Approval Workflow** – Only the SME Owner can approve or reject an outreach request before contacting a supplier.
+- **WhatsApp Connection / RFQ Link** – Generate a prefilled WhatsApp message after approval, allowing the Owner to manually contact the selected supplier without requiring WhatsApp API integration.
+- **Audit / Activity Log** – Record procurement requests, selected suppliers, approval decisions, timestamps, and outreach statuses.
+
 
 ---
 
@@ -79,3 +89,21 @@ User ──► Replit (App / API) ──► Response returned to user
 ```
 
 ---
+
+## How To Use 
+
+> To be Added
+
+---
+
+## How We Used Replit
+
+- test
+- test
+- test
+Proof of Use:
+
+---
+
+## Challenges and Learnings
+
