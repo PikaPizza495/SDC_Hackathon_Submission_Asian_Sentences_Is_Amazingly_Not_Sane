@@ -807,9 +807,6 @@ st.markdown(f"""
                 </div>
             </div>
         </div>
-        <div style="border:1px solid #CBD5E1; border-radius:8px; padding:6px 14px; font-size:0.82rem; font-weight:600; color:#0284C7; background:#FFFFFF;">
-            SDG 8 & 12 Aligned
-        </div>
     </div>
     <div style="display:flex; align-items:center; gap:14px; padding-top:14px;">
         <div style="background:#ECFDF5; color:#10B981; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.95rem; font-weight:700;">
