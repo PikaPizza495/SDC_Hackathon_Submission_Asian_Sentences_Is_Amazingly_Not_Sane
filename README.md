@@ -1,5 +1,3 @@
-# SDC_Hackathon_Submission_Asian_Sentences_Is_Amazingly_Not_Sane
-
 # InstaQuote
 
 Our project targets SMEs to connect them with suppliers much more easily with a automated system.
@@ -108,6 +106,8 @@ Proof of Use: [`Submission/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_
 
 ## Challenges and Learnings
 
+- Poor Time Management. We overcame this by creating a clear and concrete goal and delegated task to everyone to make up for lost time
+- We learned more on how to use Replit and Github
 
 ## Future Improvements
 
