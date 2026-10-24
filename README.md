@@ -98,10 +98,8 @@ User ──► Replit (App / API) ──► Response returned to user
 
 ## How We Used Replit
 
-- test
-- test
-- test
-Proof of Use:
+- **Development**: Replit is used for Database and Website Development
+Proof of Use: file:///C:/Users/pikap/OneDrive/Documents/School%20work/PDF/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_POU.pdf
 
 ---
 
