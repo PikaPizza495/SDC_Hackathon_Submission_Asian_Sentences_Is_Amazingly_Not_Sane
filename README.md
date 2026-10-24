@@ -21,7 +21,7 @@ Our project targets SMEs to connect them with suppliers much more easily with a 
 | GitHub Repository | https://github.com/PikaPizza495/SDC_Hackathon_Submission_Asian_Sentences_Is_Amazingly_Not_Sane  |
 | Live Demo         | https://instaquote-orbyte.replit.app/               |
 | Slide Deck        | [`Slides/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Pitch_Slides.pdf`](Slides/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Pitch_Slides.pdf)                   |
-| Demo Video        | To Be Added               |
+| Demo Video        | https://www.youtube.com/watch?v=SG85QGIhGEE               |
 
 
 ## Overview
@@ -144,7 +144,7 @@ https://replit.com/@tengminjie878/SDCHackathonSubmissionAsianSentencesIsAmazingl
 
 - [✓] Team name, domain (Domain 1 / Domain 2) and SDG track filled in
 - [✓] Slide deck link added
-- [ ] Demo video link added
+- [✓] Demo video link added
 - [✓] Replit used, with proof of use in `submission/`
 - [ ] Preliminary submission completed (`SDC2026_TeamName_Preliminary.pdf`)
 - [ ] Technology declaration completed (`SDC2026_TeamName_TechDeclaration.pdf`)
