@@ -22,8 +22,8 @@ Our project targets SMEs to connect them with suppliers much more easily with a 
 | ----------------- | ---------------------------------------------- |
 | GitHub Repository | https://github.com/PikaPizza495/SDC_Hackathon_Submission_Asian_Sentences_Is_Amazingly_Not_Sane/tree/main  |
 | Live Demo         | https://replit.com/join#t=ndujmumuxivpsyq-tengminjie878               |
-| Slide Deck        | https://example.com/slides                     |
-| Demo Video        | https://example.com/demo-video                 |
+| Slide Deck        | https://canva.link/8gxqyjicrhvuhhj                    |
+| Demo Video        | To Be Added               |
 
 
 ## Overview
