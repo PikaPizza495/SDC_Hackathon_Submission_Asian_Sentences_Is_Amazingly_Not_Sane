@@ -19,7 +19,7 @@ Our project targets SMEs to connect them with suppliers much more easily with a 
 | Resource          | Link                                           |
 | ----------------- | ---------------------------------------------- |
 | GitHub Repository | https://github.com/PikaPizza495/SDC_Hackathon_Submission_Asian_Sentences_Is_Amazingly_Not_Sane  |
-| Live Demo         | https://replit.com/join#t=ndujmumuxivpsyq-tengminjie878               |
+| Live Demo         | https://instaquote-orbyte.replit.app/               |
 | Slide Deck        | https://canva.link/8gxqyjicrhvuhhj                    |
 | Demo Video        | To Be Added               |
 
@@ -93,7 +93,7 @@ User ──► Replit (App / API) ──► Response returned to user
 
 ### Run on Replit
 
-1. Open https://replit.com/join#t=ndujmumuxivpsyq-tengminjie878 shown in the links section. (Will redirect you to our replit page)
+1. Open https://instaquote-orbyte.replit.app/ shown in the links section. (Will redirect you to our replit page)
 
 (Note: The suppliers provided can be found in ['SRC/suppliers.csv'](SRC/suppliers.csv))
 
@@ -104,6 +104,7 @@ User ──► Replit (App / API) ──► Response returned to user
 - **Development**: Replit is used for Database and Website Development
 
 Proof of Use: [`Submission/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_POU.pdf`](Submission/SDC2026_Asian_Sentences_Is_Amazingly_Not_Sane_Replit_POU.pdf)
+https://replit.com/@tengminjie878/SDCHackathonSubmissionAsianSentencesIsAmazinglyNotSa
 
 ## Runpod Was Not Used For This Project
 
