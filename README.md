@@ -146,8 +146,8 @@ https://replit.com/@tengminjie878/SDCHackathonSubmissionAsianSentencesIsAmazingl
 - [✓] Demo video link added
 - [✓] Replit used, with proof of use in `submission/`
 - [✓] Preliminary submission completed (`SDC2026_TeamName_Preliminary.pdf`)
-- [ ] Technology declaration completed (`SDC2026_TeamName_TechDeclaration.pdf`)
-- [ ] Submission files renamed with your team name (replace `TeamName`)
+- [✓] Technology declaration completed (`SDC2026_TeamName_TechDeclaration.pdf`)
+- [✓] Submission files renamed with your team name (replace `TeamName`)
 - [✓] "How to Run" steps verified
 - [✓] No API keys or secrets committed to the repository
 
