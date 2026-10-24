@@ -1,17 +1,9 @@
 """
 orbyte_hub.py
 Thin mock of the Orbyte connected-hub interface.
-
-ASSUMPTIONS (state these in the README and slides):
-1. Inventory service emits low-stock events.
-2. Identity service answers "who is this user and what role?".
-3. Activity log is append-only and per-tenant.
-4. The `suppliers` table is hub-shared across tenants.
-   Tenant-specific data (stock, budget, audit log) is per-tenant.
-5. Auth is simulated via a tenant switcher, not real SSO.
 """
-import os
 import json
+import os
 
 TENANTS = {
     "cafe-selangor": {
@@ -25,7 +17,6 @@ TENANTS = {
             "max_budget_rm": 180.0,
             "max_lead_days": 3,
             "prefer_eco": True,
-            "language": "English + Bahasa Melayu",
             "status": "Triggered",
         },
     },
@@ -40,7 +31,6 @@ TENANTS = {
             "max_budget_rm": 450.0,
             "max_lead_days": 4,
             "prefer_eco": True,
-            "language": "English + Bahasa Melayu",
             "status": "Triggered",
         },
     },
@@ -55,7 +45,6 @@ TENANTS = {
             "max_budget_rm": 210.0,
             "max_lead_days": 2,
             "prefer_eco": False,
-            "language": "English + Bahasa Melayu",
             "status": "Triggered",
         },
     },
@@ -82,7 +71,6 @@ def _db():
 
 
 def log_activity(tenant_id: str, entry: dict) -> bool:
-    """Persist an audit entry to PostgreSQL. Returns False if not persisted."""
     conn = _db()
     if conn is None:
         return False
@@ -111,13 +99,7 @@ def fetch_activity_log(tenant_id: str, limit: int = 50) -> list[dict]:
                 (tenant_id, limit),
             )
             rows = cur.fetchall()
-        return [
-            {
-                "Timestamp": ts.strftime("%Y-%m-%d %H:%M:%S"),
-                **payload,
-            }
-            for ts, payload in rows
-        ]
+        return [{"Timestamp": ts.strftime("%Y-%m-%d %H:%M:%S"), **payload} for ts, payload in rows]
     except Exception:
         return []
     finally:

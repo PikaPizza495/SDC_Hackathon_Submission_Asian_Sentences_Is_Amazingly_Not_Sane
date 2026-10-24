@@ -1,10 +1,12 @@
 """
 Orbyte InstaQuote: Smart SME Supplier Match & WhatsApp RFQ Automation
-SDC Hackathon 2026 — Domain 2 (Orbyte Smart SME Challenge)
 """
+import json
 import os
 import re
 import random
+import urllib.error
+import urllib.request
 from datetime import datetime
 from urllib.parse import quote
 
@@ -12,25 +14,6 @@ import pandas as pd
 import streamlit as st
 
 import orbyte_hub
-
-# --- Provider SDKs ---
-try:
-    from google import genai
-    GEMINI_AVAILABLE = True
-except ImportError:
-    GEMINI_AVAILABLE = False
-
-try:
-    from groq import Groq
-    GROQ_AVAILABLE = True
-except ImportError:
-    GROQ_AVAILABLE = False
-
-try:
-    from openai import OpenAI
-    OPENROUTER_AVAILABLE = True
-except ImportError:
-    OPENROUTER_AVAILABLE = False
 
 st.set_page_config(
     page_title="Orbyte | Smart SME Procurement Hub",
@@ -464,7 +447,6 @@ def _init_state():
         "ai_status_msg": "",
         "last_tenant": None,
         "active_request": None,
-        "chosen_supplier": None,
         "pending_approvals": [],
         "approved_link": None,
         "req_id": None,
@@ -490,9 +472,7 @@ def evaluate_suppliers(df: pd.DataFrame, req: dict) -> pd.DataFrame:
         if len(w) > 2 and w not in STOPWORDS
     }
 
-    scores = []
-    reasons = []
-    item_matches = []
+    scores, reasons, item_matches = [], [], []
 
     for _, row in cat_df.iterrows():
         score = 50
@@ -523,12 +503,8 @@ def evaluate_suppliers(df: pd.DataFrame, req: dict) -> pd.DataFrame:
             score -= 20
             why.append("Over Budget")
 
-        if row["Meets_Lead_Time"]:
-            score += 10
-            why.append(f"{row['lead_time_days']}d Lead")
-        else:
-            score -= 10
-            why.append(f"{row['lead_time_days']}d Lead")
+        score += 10 if row["Meets_Lead_Time"] else -10
+        why.append(f"{row['lead_time_days']}d Lead")
 
         score += int((row["reliability_rating"] - 4.0) * 10)
         if req["prefer_eco"] and bool(row["eco_certified"]):
@@ -546,80 +522,163 @@ def evaluate_suppliers(df: pd.DataFrame, req: dict) -> pd.DataFrame:
         ascending=[False, False, False, False, False],
     )
 
-def generate_rfq_text(top: dict, req: dict, lang: str, tone: int, provider: str, api_key: str):
-    mins, maxs = top["est_min_total"], top["est_max_total"]
-    
-    if "Bahasa Melayu Only" in lang:
-        fallback_rfq = f"Hi {top['name']},\n\nKami dari Orbyte Hub ingin meminta sebut harga:\n• Item: {req['item_name']}\n• Kuantiti: {req['quantity']}\n• Bajet: RM {mins:.2f} – {maxs:.2f}\nBoleh sahkan stok dan penghantaran dalam {req['max_lead_days']} hari?\n\nTerima kasih."
-    elif "English Only" in lang:
-        fallback_rfq = f"Hi {top['name']} Team,\n\nWe found you via Orbyte Hub and would like a quote:\n• Item: {req['item_name']}\n• Quantity: {req['quantity']}\n• Budget: RM {mins:.2f} – {maxs:.2f}\nCan you confirm stock and delivery within {req['max_lead_days']} days?\n\nThank you."
-    else:
-        fallback_rfq = f"Salam / Hi {top['name']} Team,\n\nKami ingin meminta sebut harga:\n• Item: {req['item_name']}\n• Quantity: {req['quantity']}\n• Budget: RM {mins:.2f} – {maxs:.2f}\nBoleh sahkan stok dan penghantaran dalam {req['max_lead_days']} hari? / Can you confirm stock and delivery?\n\nThank you / Terima kasih."
+MAX_AI_CALLS_PER_SESSION = 30  # Hard stop per browser session
+MAX_OUTPUT_TOKENS = 180
+MAX_REASONING_OUTPUT_TOKENS = 400  # gpt-oss spends tokens "thinking", so it needs more headroom
 
-    if not api_key:
-        return fallback_rfq, "Using built-in Orbyte template (No API Key provided)."
-        
-    tone_instruction = "formal and professional" if tone <= 2 else ("friendly and casual" if tone >= 4 else "standard business")
-    
+
+def _post_json(url: str, headers: dict, payload: dict) -> dict:
+    """Single-shot HTTPS POST helper with zero retries."""
+    req_obj = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    with urllib.request.urlopen(req_obj, timeout=15) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def generate_rfq_text(top: dict, req: dict, lang: str, tone: int, provider: str, api_key: str, tenant_name: str = "Orbyte Procurement"):
+    mins, maxs = top["est_min_total"], top["est_max_total"]
+
+    if "Bahasa Melayu Only" in lang:
+        fallback_rfq = f"Hi {top['name']},\n\nKami dari {tenant_name} ingin meminta sebut harga:\n• Item: {req['item_name']}\n• Kuantiti: {req['quantity']}\n• Bajet: RM {mins:.2f} – {maxs:.2f}\nBoleh sahkan stok dan penghantaran dalam {req['max_lead_days']} hari?\n\nTerima kasih.\n{tenant_name}"
+    elif "English Only" in lang:
+        fallback_rfq = f"Hi {top['name']} Team,\n\nWe found you via Orbyte Hub and would like a quote:\n• Item: {req['item_name']}\n• Quantity: {req['quantity']}\n• Budget: RM {mins:.2f} – {maxs:.2f}\nCan you confirm stock and delivery within {req['max_lead_days']} days?\n\nThank you.\n{tenant_name}"
+    else:
+        fallback_rfq = f"Salam / Hi {top['name']} Team,\n\nKami ingin meminta sebut harga:\n• Item: {req['item_name']}\n• Quantity: {req['quantity']}\n• Budget: RM {mins:.2f} – {maxs:.2f}\nBoleh sahkan stok dan penghantaran dalam {req['max_lead_days']} hari? / Can you confirm stock and delivery?\n\nThank you / Terima kasih.\n{tenant_name}"
+
+    clean_key = (api_key or "").strip()
+    if not clean_key:
+        return fallback_rfq, "Using built-in Orbyte template (No API Key entered)."
+
+    # Auto-detect provider from key prefix
+    if clean_key.startswith("gsk_"):
+        provider = "Groq"
+    elif clean_key.startswith("sk-or-"):
+        provider = "OpenRouter"
+    elif clean_key.startswith("AIza"):
+        provider = "Gemini"
+
+    # Guardrail 1: identical request already drafted this session -> reuse it (0 tokens)
+    cache_key = f"{provider}|{tenant_name}|{top['name']}|{req['item_name']}|{req['quantity']}|{mins}|{maxs}|{lang}|{tone}"
+    cache = st.session_state.setdefault("rfq_cache", {})
+    used_calls = st.session_state.get("ai_call_count", 0)
+    if cache_key in cache:
+        return cache[cache_key], f"Loaded from session cache (0 tokens used • {used_calls}/{MAX_AI_CALLS_PER_SESSION} calls)."
+
+    # Guardrail 2: hard cap on AI calls per session
+    if used_calls >= MAX_AI_CALLS_PER_SESSION:
+        return fallback_rfq, f"AI call limit reached ({MAX_AI_CALLS_PER_SESSION}/{MAX_AI_CALLS_PER_SESSION}). Using built-in template."
+
+    tone_instruction = "formal" if tone <= 2 else ("friendly" if tone >= 4 else "professional")
     prompt = (
-        f"You are an SME procurement assistant. Write a short WhatsApp Request for Quotation (RFQ).\n"
-        f"Language: {lang}\n"
-        f"Tone: {tone_instruction}\n"
-        f"Supplier: {top['name']}\n"
-        f"Item: {req['quantity']} x {req['item_name']}\n"
-        f"Budget: RM {mins:.2f} to {maxs:.2f}\n"
-        f"Delivery constraint: {req['max_lead_days']} days\n\n"
-        f"CRITICAL INSTRUCTIONS:\n"
-        f"- You MUST include the item, quantity, budget, and delivery constraint.\n"
-        f"- Use the word 'and' instead of '&'.\n"
-        f"- DO NOT use placeholders like [Your Name] or [Company]. Sign off as 'Orbyte Procurement'.\n"
-        f"- Output ONLY the message text, no markdown."
+        f"Write a concise WhatsApp RFQ ({lang}, {tone_instruction} tone) to {top['name']} "
+        f"for {req['quantity']}x {req['item_name']}, budget RM {mins:.2f}-{maxs:.2f}, "
+        f"delivery within {req['max_lead_days']} days. Use 'and' not '&'. "
+        f"Sign off as '{tenant_name}'. No placeholders. Plain text only."
     )
 
-    try:
-        if provider == "Gemini" and GEMINI_AVAILABLE:
-            client = genai.Client(api_key=api_key)
-            for model_name in ["gemini-2.5-flash", "gemini-2.0-flash"]:
-                try:
-                    response = client.models.generate_content(model=model_name, contents=prompt)
-                    if response and response.text:
-                        text = response.text.strip()
-                        if len(text.split()) > 15:
-                            return text, f"Drafted with Gemini ({model_name})."
-                except Exception:
+    skipped: list[str] = []  # why each model was skipped, shown if everything fails
+
+    def _success(text: str, label: str):
+        st.session_state.ai_call_count = used_calls + 1
+        cache[cache_key] = text
+        return text, f"Drafted with {label} ({st.session_state.ai_call_count}/{MAX_AI_CALLS_PER_SESSION} calls used)."
+
+    def _chat_models(url: str, headers: dict, models: list[str]):
+        """OpenAI-style chat call (Groq/OpenRouter). Skips a model if it's retired/missing or returns empty text."""
+        for model_name in models:
+            is_reasoning = "gpt-oss" in model_name
+            body = {
+                "model": model_name,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.6,
+                "max_tokens": MAX_REASONING_OUTPUT_TOKENS if is_reasoning else MAX_OUTPUT_TOKENS,
+            }
+            if is_reasoning and provider == "Groq":
+                body["reasoning_effort"] = "low"  # keeps thinking tokens small
+            try:
+                data = _post_json(url, headers, body)
+                choices = data.get("choices", [])
+                text = (choices[0].get("message", {}).get("content") or "").strip() if choices else ""
+                if text:
+                    return _success(text, f"{provider} ({model_name})")
+                skipped.append(f"{model_name}: empty reply")
+            except urllib.error.HTTPError as he:
+                err_body = he.read().decode("utf-8", errors="ignore").lower()
+                if he.code == 404 or (he.code == 400 and any(k in err_body for k in ("decommission", "not found", "does not exist", "not_found"))):
+                    skipped.append(f"{model_name}: unavailable (HTTP {he.code})")
                     continue
-            return fallback_rfq, "Gemini busy. Using template."
+                raise
+        return None
 
-        elif provider == "Groq" and GROQ_AVAILABLE:
-            client = Groq(api_key=api_key)
-            chat_completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7,
-                max_tokens=600,
+    try:
+        result = None
+
+        if provider == "Gemini":
+            data = _post_json(
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+                {
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": clean_key,  # header, so the key never appears in URLs/logs
+                    "User-Agent": "Orbyte-InstaQuote/1.0",
+                },
+                {
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {"maxOutputTokens": MAX_OUTPUT_TOKENS, "temperature": 0.6},
+                },
             )
-            text = chat_completion.choices[0].message.content
-            if text and len(text.split()) > 15:
-                return text.strip(), "Drafted with Groq (Llama 3.3 70B)."
-            return fallback_rfq, "Groq cut off message. Using template."
+            candidates = data.get("candidates", [])
+            if candidates:
+                parts = candidates[0].get("content", {}).get("parts", [])
+                text = "".join(p.get("text", "") for p in parts).strip()
+                if text:
+                    result = _success(text, "Gemini (gemini-2.0-flash)")
+                else:
+                    skipped.append("gemini-2.0-flash: empty reply")
 
-        elif provider == "OpenRouter" and OPENROUTER_AVAILABLE:
-            client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
-            response = client.chat.completions.create(
-                model="deepseek/deepseek-chat:free",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7,
-                max_tokens=600,
+        elif provider == "Groq":
+            result = _chat_models(
+                "https://api.groq.com/openai/v1/chat/completions",
+                {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {clean_key}",
+                    "User-Agent": "Mozilla/5.0 (compatible; OrbyteInstaQuote/1.0)",
+                },
+                ["openai/gpt-oss-20b", "llama-3.1-8b-instant", "llama-3.3-70b-versatile", "openai/gpt-oss-120b"]
             )
-            text = response.choices[0].message.content
-            if text and len(text.split()) > 15:
-                return text.strip(), "Drafted with OpenRouter (DeepSeek)."
-            return fallback_rfq, "OpenRouter cut off message. Using template."
 
-    except Exception as e:
-        return fallback_rfq, f"{provider} Error: {str(e)}"
+        elif provider == "OpenRouter":
+            # ':free' models only, so a paid credit balance is never touched
+            result = _chat_models(
+                "https://openrouter.ai/api/v1/chat/completions",
+                {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {clean_key}",
+                    "HTTP-Referer": "https://orbyte.local",
+                    "X-Title": "Orbyte InstaQuote",
+                    "User-Agent": "Mozilla/5.0 (compatible; OrbyteInstaQuote/1.0)",
+                },
+                ["meta-llama/llama-3.3-70b-instruct:free", "google/gemma-3-27b-it:free"],
+            )
 
-    return fallback_rfq, "Provider SDK not available."
+        if result:
+            return result
+
+    except urllib.error.HTTPError as he:
+        if he.code in (402, 429):
+            return fallback_rfq, f"{provider} quota/rate limit reached (HTTP {he.code}). Using built-in template."
+        if he.code in (400, 401, 403):
+            return fallback_rfq, f"{provider} rejected the request (HTTP {he.code}); check your API key. Using built-in template."
+        if he.code == 404:
+            return fallback_rfq, f"{provider} model unavailable (HTTP 404). Using built-in template."
+        return fallback_rfq, f"{provider} HTTP {he.code}. Using built-in template."
+    except Exception:
+        return fallback_rfq, f"{provider} connection problem. Using built-in template."
+
+    return fallback_rfq, f"{provider} returned no text ({'; '.join(skipped) or 'no response'}). Using built-in template."
 
 def current_audit(tenant_id: str) -> list[dict]:
     persisted = orbyte_hub.fetch_activity_log(tenant_id, limit=50)
@@ -683,7 +742,12 @@ def render_sidebar_controls():
 
     with st.expander(":material/psychology: AI Co-Pilot Settings", expanded=False):
         provider = st.selectbox("LLM Provider", ["Gemini", "Groq", "OpenRouter"])
-        api_key = st.text_input("API Key", type="password", placeholder="Optional (uses template)")
+        api_key = st.text_input(
+            "API Key (Session-Only, Never Saved)",
+            type="password",
+            placeholder="Optional (uses template)",
+            autocomplete="off",
+        )
 
     return tenant_id, is_approver, provider, api_key
 
@@ -839,7 +903,6 @@ with col_left:
             })
             ranked = evaluate_suppliers(suppliers_df, st.session_state.active_request)
             st.session_state.matched_suppliers = ranked
-            st.session_state.chosen_supplier = None
             st.session_state.draft_rfq_message = ""
             st.session_state.approved_link = None
             record_activity(tenant_id, {
@@ -964,7 +1027,6 @@ with col_approve:
                 format_func=lambda i: f"[{records[i]['Match_Score']} pts] {records[i]['name']} (RM {records[i]['est_min_total']:.2f}–{records[i]['est_max_total']:.2f})"
             )
             chosen = records[idx]
-            st.session_state.chosen_supplier = chosen
 
             c_lang, c_tone = st.columns(2)
             with c_lang:
@@ -979,7 +1041,7 @@ with col_approve:
 
             if st.button(":material/auto_awesome: Generate RFQ Draft", type="secondary", use_container_width=True):
                 with st.spinner("Drafting quotation request..."):
-                    text, status_msg = generate_rfq_text(chosen, st.session_state.active_request, lang_choice, tone_choice, provider, api_key)
+                    text, status_msg = generate_rfq_text(chosen, st.session_state.active_request, lang_choice, tone_choice, provider, api_key, tenant_name)
                     st.session_state.draft_rfq_message = text
                     st.session_state.ai_status_msg = status_msg
                     st.rerun()
